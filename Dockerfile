@@ -11,9 +11,15 @@ RUN apt-get update && apt-get install -y \
 # 2. Extensiones PHP
 RUN docker-php-ext-install pdo pdo_mysql gd mbstring zip
 
-# 3. Corregir conflicto de MPM — dejar solo prefork
-RUN a2dismod mpm_event mpm_worker 2>/dev/null || true && \
-    a2enmod mpm_prefork
+# 3. Eliminar MPMs conflictivos directamente (más confiable que a2dismod)
+RUN rm -f /etc/apache2/mods-enabled/mpm_event.conf \
+          /etc/apache2/mods-enabled/mpm_event.load \
+          /etc/apache2/mods-enabled/mpm_worker.conf \
+          /etc/apache2/mods-enabled/mpm_worker.load && \
+    ln -sf /etc/apache2/mods-available/mpm_prefork.conf \
+           /etc/apache2/mods-enabled/mpm_prefork.conf && \
+    ln -sf /etc/apache2/mods-available/mpm_prefork.load \
+           /etc/apache2/mods-enabled/mpm_prefork.load
 
 # 4. Habilitar mod_rewrite
 RUN a2enmod rewrite
@@ -25,7 +31,7 @@ RUN sed -i 's/AllowOverride None/AllowOverride All/g' /etc/apache2/apache2.conf
 RUN curl -sS https://getcomposer.org/installer | php -- \
     --install-dir=/usr/local/bin --filename=composer
 
-# 7. Copiar composer.json primero (caché de Docker)
+# 7. Copiar composer.json primero
 COPY composer.json composer.lock /var/www/html/
 WORKDIR /var/www/html
 
