@@ -1,7 +1,8 @@
-FROM php:8.2-apache
+FROM php:8.2-fpm
 
 # 1. Dependencias del sistema
 RUN apt-get update && apt-get install -y \
+    nginx \
     zlib1g-dev \
     libpng-dev \
     libzip-dev \
@@ -11,25 +12,39 @@ RUN apt-get update && apt-get install -y \
 # 2. Extensiones PHP
 RUN docker-php-ext-install pdo pdo_mysql gd mbstring zip
 
-# 3. Eliminar TODOS los MPM y habilitar solo prefork
-RUN find /etc/apache2/mods-enabled/ -name "mpm_*" -delete && \
-    a2enmod mpm_prefork && \
-    a2enmod rewrite
-
-# 4. Permitir .htaccess
-RUN sed -i 's/AllowOverride None/AllowOverride All/g' /etc/apache2/apache2.conf
-
-# 5. Instalar Composer
+# 3. Instalar Composer
 RUN curl -sS https://getcomposer.org/installer | php -- \
     --install-dir=/usr/local/bin --filename=composer
 
-# 6. Copiar composer.json primero
+# 4. Configuración de nginx
+RUN echo 'server { \
+    listen 80; \
+    root /var/www/html; \
+    index index.php; \
+    location / { \
+        try_files $uri $uri/ /index.php?$query_string; \
+    } \
+    location ~ \.php$ { \
+        fastcgi_pass 127.0.0.1:9000; \
+        fastcgi_index index.php; \
+        include fastcgi_params; \
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name; \
+    } \
+}' > /etc/nginx/sites-available/default
+
+# 5. Copiar composer.json primero
 COPY composer.json composer.lock /var/www/html/
 WORKDIR /var/www/html
 
 RUN composer install --optimize-autoloader --no-scripts --no-interaction
 
-# 7. Copiar el resto del proyecto
+# 6. Copiar el resto del proyecto
 COPY . /var/www/html/
 
+# 7. Script de arranque
+RUN echo '#!/bin/sh\nphp-fpm -D\nnginx -g "daemon off;"' > /start.sh && \
+    chmod +x /start.sh
+
 EXPOSE 80
+
+CMD ["/start.sh"]
