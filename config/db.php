@@ -1,11 +1,12 @@
 <?php
-$host = 'localhost';
-$dbname = 'anxitech';
-$username = 'root';
-$password = '';
+$host = getenv('MYSQLHOST');
+$dbname = getenv('MYSQLDATABASE');
+$username = getenv('MYSQLUSER');
+$password = getenv('MYSQLPASSWORD');
+$port = getenv('MYSQLPORT') ?: '3306';
 $charset = 'utf8mb4';
 
-$dsn = "mysql:host=$host;dbname=$dbname;charset=$charset";
+$dsn = "mysql:host=$host;port=$port;dbname=$dbname;charset=$charset";
 $options = [
     PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
@@ -13,11 +14,9 @@ $options = [
 ];
 
 try {
-    // Creamos una instancia de PDO
     $pdo = new PDO($dsn, $username, $password, $options);
 } catch (\PDOException $e) {
     echo "Error de conexión: " . $e->getMessage();
     exit;
 }
 ?>
-
