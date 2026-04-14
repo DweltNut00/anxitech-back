@@ -1,5 +1,5 @@
 <?php
-$host = getenv('MYSQLHOST');
+$host = getenv('MYSLHOST');
 $dbname = getenv('MYSQLDATABASE');
 $username = getenv('MYSQLUSER');
 $password = getenv('MYSQLPASSWORD');
