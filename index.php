@@ -6,8 +6,8 @@ $dotenv->safeLoad();
 
 // CORS headers
 $allowed_origins = [
-    'anxitech-back-production.up.railway.app/backend/api/', // para producción
-    'http://localhost:5173', // para desarrollo local
+    'https://anxitechfrontend.netlify.app', // ← URL del FRONTEND, no del backend
+    'http://localhost:5173',
 ];
 
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
