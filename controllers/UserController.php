@@ -2,6 +2,7 @@
 // Incluir la conexión PDO y el modelo User
 require_once '..\config\db.php';
 require_once '..\models\Usuario.php';
+require_once __DIR__ . '/../config/cors.php';
 
 class UserController {
     // Método para enviar código

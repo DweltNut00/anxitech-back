@@ -1,6 +1,7 @@
 <?php
 require_once '..\config\db.php'; // Asegúrate de que la conexión PDO esté disponible
 require_once '..\models\Usuario.php';
+require_once __DIR__ . '/../config/cors.php';
 
 class AuthController {
     public function login($username, $password) {

@@ -2,6 +2,7 @@
 // Incluir la conexión PDO y los modelos Recomendacion
 require_once '..\config\db.php';
 require_once '..\models\Recomendacion.php';
+require_once __DIR__ . '/../config/cors.php';
 
 class RecommendationController {
     private $pdo;
