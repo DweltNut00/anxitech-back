@@ -11,8 +11,9 @@ RUN apt-get update && apt-get install -y \
 # 2. Extensiones PHP
 RUN docker-php-ext-install pdo pdo_mysql gd mbstring zip
 
-# 3. Habilitar mod_rewrite de Apache
-RUN a2enmod rewrite headers
+# 3. Habilitar módulos y fijar MPM a prefork
+RUN a2dismod mpm_event mpm_worker || true && \
+    a2enmod mpm_prefork rewrite headers
 
 # 4. Instalar Composer
 RUN curl -sS https://getcomposer.org/installer | php -- \
@@ -27,11 +28,9 @@ RUN composer install --optimize-autoloader --no-scripts --no-interaction
 # 6. Copiar el resto del proyecto
 COPY . /var/www/html/
 
-# 7. Permisos
-RUN chown -R www-data:www-data /var/www/html
-
-# 8. Configurar Apache para AllowOverride (necesario para .htaccess)
-RUN sed -i 's/AllowOverride None/AllowOverride All/g' /etc/apache2/apache2.conf
+# 7. Permisos y AllowOverride
+RUN chown -R www-data:www-data /var/www/html && \
+    sed -i 's/AllowOverride None/AllowOverride All/g' /etc/apache2/apache2.conf
 
 EXPOSE 80
 
