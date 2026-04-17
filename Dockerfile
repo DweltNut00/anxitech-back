@@ -41,8 +41,8 @@ RUN composer install --optimize-autoloader --no-scripts --no-interaction
 # 6. Copiar el resto del proyecto
 COPY . /var/www/html/
 
-# 7. Script de arranque
-RUN echo '#!/bin/sh\nphp-fpm -D\nnginx -g "daemon off;"' > /start.sh && \
+# 7. Script de arranque — usando printf para saltos de línea reales
+RUN printf '#!/bin/sh\nphp-fpm -D\nnginx -g "daemon off;"\n' > /start.sh && \
     chmod +x /start.sh
 
 EXPOSE 80
