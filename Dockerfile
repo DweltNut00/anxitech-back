@@ -1,8 +1,7 @@
-FROM php:8.2-fpm
+FROM php:8.2-apache
 
 # 1. Dependencias del sistema
 RUN apt-get update && apt-get install -y \
-    nginx \
     zlib1g-dev \
     libpng-dev \
     libzip-dev \
@@ -12,25 +11,12 @@ RUN apt-get update && apt-get install -y \
 # 2. Extensiones PHP
 RUN docker-php-ext-install pdo pdo_mysql gd mbstring zip
 
-# 3. Instalar Composer
+# 3. Habilitar mod_rewrite de Apache
+RUN a2enmod rewrite headers
+
+# 4. Instalar Composer
 RUN curl -sS https://getcomposer.org/installer | php -- \
     --install-dir=/usr/local/bin --filename=composer
-
-# 4. Configuración de nginx
-RUN echo 'server { \
-    listen 80; \
-    root /var/www/html; \
-    index index.php; \
-    location / { \
-        try_files $uri $uri/ /index.php?$query_string; \
-    } \
-    location ~ \.php$ { \
-        fastcgi_pass 127.0.0.1:9000; \
-        fastcgi_index index.php; \
-        include fastcgi_params; \
-        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name; \
-    } \
-}' > /etc/nginx/sites-available/default
 
 # 5. Copiar composer.json primero
 COPY composer.json composer.lock /var/www/html/
@@ -41,10 +27,12 @@ RUN composer install --optimize-autoloader --no-scripts --no-interaction
 # 6. Copiar el resto del proyecto
 COPY . /var/www/html/
 
-# 7. Script de arranque — usando printf para saltos de línea reales
-RUN printf '#!/bin/sh\nphp-fpm -D\nnginx -g "daemon off;"\n' > /start.sh && \
-    chmod +x /start.sh
+# 7. Permisos
+RUN chown -R www-data:www-data /var/www/html
+
+# 8. Configurar Apache para AllowOverride (necesario para .htaccess)
+RUN sed -i 's/AllowOverride None/AllowOverride All/g' /etc/apache2/apache2.conf
 
 EXPOSE 80
 
-CMD ["/start.sh"]
+CMD ["apache2-foreground"]
