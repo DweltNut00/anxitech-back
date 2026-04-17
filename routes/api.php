@@ -1,9 +1,10 @@
 <?php
-require_once '../config/db.php';
-require_once '../controllers/UserController.php';
-require_once '../controllers/AnalyticsController.php';
-require_once '../controllers/QuestionController.php';
-require_once '../controllers/RecommendationController.php';
+require_once __DIR__ . '/../config/cors.php';
+require_once __DIR__ . '/../config/db.php';
+require_once __DIR__ . '/../controllers/UserController.php';
+require_once __DIR__ . '/../controllers/AnalyticsController.php';
+require_once __DIR__ . '/../controllers/QuestionController.php';
+require_once __DIR__ . '/../controllers/RecommendationController.php';
 
 // Inicializamos los controladores con la conexión PDO
 $userController = new UserController($pdo);
