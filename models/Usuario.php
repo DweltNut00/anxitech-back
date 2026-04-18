@@ -1,42 +1,12 @@
 <?php
-// Capturar errores PHP y devolverlos como JSON
-set_error_handler(function($errno, $errstr, $errfile, $errline) {
-    header("Access-Control-Allow-Origin: https://anxitechfrontend.netlify.app");
-    header("Content-Type: application/json");
-    echo json_encode([
-        'status' => 'error',
-        'php_error' => $errstr,
-        'file' => $errfile,
-        'line' => $errline
-    ]);
-    exit;
-});
-
-set_exception_handler(function($e) {
-    header("Access-Control-Allow-Origin: https://anxitechfrontend.netlify.app");
-    header("Content-Type: application/json");
-    echo json_encode([
-        'status' => 'error',
-        'exception' => $e->getMessage(),
-        'file' => $e->getFile(),
-        'line' => $e->getLine()
-    ]);
-    exit;
-});
-
 if (session_status() !== PHP_SESSION_ACTIVE) {
     session_start();
 }
 
-require __DIR__ . '/../vendor/autoload.php'; 
+require __DIR__ . '/../vendor/autoload.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
-
-//require_once '..\PHPMailer-master\src\Exception.php';
-//require_once '..\PHPMailer-master\src\PHPMailer.php';
-//require_once '..\PHPMailer-master\src\SMTP.php';
-
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class Usuario
