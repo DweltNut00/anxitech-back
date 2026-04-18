@@ -16,14 +16,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(204);
     exit;
 }
-require_once 'headers.php';
-require_once '..\config\db.php';
+
+require_once __DIR__ . '/../config/db.php';
 
 $action = $_GET['action'] ?? '';
 
 switch ($action) {
 
-    // GET geo.php?action=estados
     case 'estados':
         $stmt = $pdo->query("SELECT id, nombre FROM geo_estados ORDER BY nombre ASC");
         $estados = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -33,7 +32,6 @@ switch ($action) {
         ]);
         break;
 
-    // GET geo.php?action=municipios&estado=Veracruz de Ignacio de la Llave
     case 'municipios':
         $nombreEstado = trim($_GET['estado'] ?? '');
 
@@ -62,3 +60,4 @@ switch ($action) {
         echo json_encode(['status' => 'error', 'message' => 'Action not recognized']);
         break;
 }
+?>
