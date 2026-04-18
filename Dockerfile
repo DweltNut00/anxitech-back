@@ -11,12 +11,11 @@ RUN apt-get update && apt-get install -y \
 # 2. Extensiones PHP
 RUN docker-php-ext-install pdo pdo_mysql gd mbstring zip
 
-# 3. Forzar solo mpm_prefork — eliminar otros MPM directamente
-RUN rm -f /etc/apache2/mods-enabled/mpm_event.conf \
-          /etc/apache2/mods-enabled/mpm_event.load \
-          /etc/apache2/mods-enabled/mpm_worker.conf \
-          /etc/apache2/mods-enabled/mpm_worker.load && \
-    a2enmod mpm_prefork rewrite headers
+# 3. Eliminar TODOS los MPM y activar solo prefork manualmente
+RUN find /etc/apache2/mods-enabled -name "mpm_*" -delete && \
+    ln -s /etc/apache2/mods-available/mpm_prefork.load /etc/apache2/mods-enabled/mpm_prefork.load && \
+    ln -s /etc/apache2/mods-available/mpm_prefork.conf /etc/apache2/mods-enabled/mpm_prefork.conf && \
+    a2enmod rewrite headers
 
 # 4. Instalar Composer
 RUN curl -sS https://getcomposer.org/installer | php -- \
