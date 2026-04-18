@@ -2,6 +2,22 @@
 ini_set('display_errors', 0);
 error_reporting(0);
 ob_start(); // Captura cualquier output accidental
+ob_end_clean();
+
+// Capturar errores fatales
+register_shutdown_function(function() {
+    $error = error_get_last();
+    if ($error && in_array($error['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR])) {
+        header("Content-Type: application/json");
+        echo json_encode([
+            'status' => 'error',
+            'fatal' => $error['message'],
+            'file' => $error['file'],
+            'line' => $error['line']
+        ]);
+    }
+});
+
 $allowed_origins = [
     'https://anxitechfrontend.netlify.app',
     'http://localhost:5173',
