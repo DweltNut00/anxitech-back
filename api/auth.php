@@ -1,4 +1,7 @@
 <?php
+ini_set('display_errors', 0);
+error_reporting(0);
+ob_start(); // Captura cualquier output accidental
 $allowed_origins = [
     'https://anxitechfrontend.netlify.app',
     'http://localhost:5173',
