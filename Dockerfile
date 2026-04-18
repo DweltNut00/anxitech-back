@@ -19,5 +19,4 @@ RUN composer install --optimize-autoloader --no-scripts --no-interaction
 
 COPY . /var/www/html/
 
-# Sin EXPOSE fijo — Railway asigna el puerto via $PORT
-CMD ["sh", "-c", "php -S 0.0.0.0:${PORT:-8080} -t /var/www/html"]
+CMD ["sh", "-c", "php -S 0.0.0.0:9000 -t /var/www/html"]
