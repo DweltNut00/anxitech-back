@@ -1,11 +1,11 @@
-<?php
-require __DIR__ . '/../vendor/autoload.php';
+    <?php
+    require __DIR__ . '/../vendor/autoload.php';
 
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
-use PhpOffice\PhpSpreadsheet\IOFactory;
+    use PHPMailer\PHPMailer\PHPMailer;
+    use PHPMailer\PHPMailer\Exception;
+    use PhpOffice\PhpSpreadsheet\IOFactory;
 
-class Usuario
+    class Usuario
 {
     private $pdo;
 
