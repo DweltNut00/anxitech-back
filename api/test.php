@@ -11,7 +11,7 @@ $stmt = $pdo->query("SHOW TABLES");
 $tables = $stmt->fetchAll(PDO::FETCH_COLUMN);
 echo json_encode(['tablas' => $tables]);
 
-require_once __DIR__ . '/../controllers/AuthController.php';
-$authController = new AuthController();
-$response = $authController->login('test', 'test');
-echo json_encode(['response' => $response]);
+// Verificar usuario admin
+$stmt = $pdo->query("SELECT id, usuario, email FROM usuario LIMIT 3");
+$usuarios = $stmt->fetchAll();
+echo json_encode(['usuarios' => $usuarios]);
