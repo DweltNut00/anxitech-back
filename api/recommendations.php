@@ -18,8 +18,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 require_once 'headers.php';
 
-require_once '..\config\db.php';
-require_once '..\controllers\RecommendationController.php';
+
+require_once __DIR__ . '/../config/db.php';
+require_once __DIR__ . '/../controllers/RecommendationController.php';
 
 $action = $_GET['action'] ?? '';
 $data = json_decode(file_get_contents('php://input'), true);
