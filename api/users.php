@@ -16,7 +16,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(204);
     exit;
 }
-require_once 'headers.php';
 
 if (session_status() !== PHP_SESSION_ACTIVE) {
     session_start();
