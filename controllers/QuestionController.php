@@ -1,7 +1,5 @@
 <?php
 // Incluir la conexión PDO y los modelos Question y Answer
-require_once __DIR__ . '/../config/cors.php';
-require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../models/Question.php';
 
 class QuestionController {
