@@ -17,15 +17,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 
-if (session_status() !== PHP_SESSION_ACTIVE) {
-    session_start();
-}
-
-require_once '../config/db.php';
-require_once '../controllers/UserController.php';
+require_once __DIR__ . '/../config/db.php';
+require_once __DIR__ . '/../controllers/UserController.php';
 
 $action = $_GET['action'] ?? '';
-$data = json_decode(file_get_contents('php://input'), true);
+$data = json_decode(file_get_contents('php://input'), true) ?: [];
 
 $userController = new UserController(); // 🔥 DEFINIR UNA SOLA VEZ AQUÍ
 
@@ -67,7 +63,8 @@ switch ($action) {
         break;
 
     case 'getAlumno':
-        $response = $userController->getAlumno($data['id']);
+        $id = $_GET['id'] ?? $data['id'] ?? null;
+        $response = $userController->getAlumno($id);
         echo json_encode($response);
         break;
 
