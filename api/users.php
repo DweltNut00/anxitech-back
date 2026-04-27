@@ -103,6 +103,11 @@ switch ($action) {
         echo json_encode($response);
         break;
 
+    case 'getAlumnoById':
+    $response = $userController->getAlumno($data['id']);
+    echo json_encode($response);
+    break;
+
     default:
         echo json_encode(['error' => 'Action not recognized']);
 }
