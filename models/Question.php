@@ -164,27 +164,30 @@ public function registerEncuestaExtra($data)
 
     try {
         // **MODIFICADO: Agregar los 3 nuevos campos**
-        $stmt = $this->pdo->prepare("INSERT INTO complemento (id_alumno, id_aplicacion, carrera, promedio_anterior, semestre, materias, transporte, familiares, trabajo, beca, sexo, edad, estado_civil, tipo_ensenanza, tiene_hijos, ingreso_mensual, horas_sueno) VALUES (:id_alumno, :id_aplicacion, :carrera, :promedio_anterior, :semestre, :materias, :transporte, :familiares, :trabajo, :beca, :sexo, :edad, :estado_civil, :tipo_ensenanza, :tiene_hijos, :ingreso_mensual, :horas_sueno)");
-        
-        $stmt->execute([
-            'id_alumno' => $data['id_alumno'],
-            'id_aplicacion' => $data['id_aplicacion'],
-            'carrera' => $data['carrera'],
-            'promedio_anterior' => $data['promedio_anterior'],
-            'semestre' => $data['semestre'],
-            'materias' => $data['materias'],
-            'transporte' => $data['transporte'],
-            'familiares' => $data['familiares'],
-            'trabajo' => $data['trabajo'],
-            'beca' => $data['beca'],
-            'sexo' => $alumnoData['sexo'],              // **NUEVO**
-            'edad' => $alumnoData['edad'],              // **NUEVO**
-            'estado_civil' => $alumnoData['estado_civil'], // **NUEVO**
-            'tipo_ensenanza'    => $data['tipo_ensenanza'],
-            'tiene_hijos'       => $data['tiene_hijos'],
-            'ingreso_mensual'   => $data['ingreso_mensual'],
-            'horas_sueno'       => $data['horas_sueno'],
-        ]);
+       $stmt = $this->pdo->prepare("INSERT INTO complemento 
+    (id_alumno, id_aplicacion, carrera, promedio_anterior, semestre, materias, transporte, familiares, trabajo, beca, sexo, edad, estado_civil, maestros_estrictos, tiene_hijos, ingreso_mensual, horas_sueno) 
+    VALUES 
+    (:id_alumno, :id_aplicacion, :carrera, :promedio_anterior, :semestre, :materias, :transporte, :familiares, :trabajo, :beca, :sexo, :edad, :estado_civil, :maestros_estrictos, :tiene_hijos, :ingreso_mensual, :horas_sueno)");
+
+$stmt->execute([
+    'id_alumno'          => $data['id_alumno'],
+    'id_aplicacion'      => $data['id_aplicacion'],
+    'carrera'            => $data['carrera'],
+    'promedio_anterior'  => $data['promedio_anterior'],
+    'semestre'           => $data['semestre'],
+    'materias'           => $data['materias'],
+    'transporte'         => $data['transporte'],
+    'familiares'         => $data['familiares'],
+    'trabajo'            => $data['trabajo'],
+    'beca'               => $data['beca'],
+    'sexo'               => $alumnoData['sexo'],
+    'edad'               => $alumnoData['edad'],
+    'estado_civil'       => $alumnoData['estado_civil'],
+    'maestros_estrictos' => $data['maestros_estrictos'],
+    'tiene_hijos'        => $data['tiene_hijos'],
+    'ingreso_mensual'    => $data['ingreso_mensual'],
+    'horas_sueno'        => $data['horas_sueno'],
+]);
 
         if ($stmt) {
             return ['status' => 'ok'];
