@@ -130,8 +130,8 @@ class Question
             $this->pdo->rollback();
             return ['status' => 'error', 'message' => 'No se pudo agregar en "Encuesta".'];
         } catch (\Throwable $th) {
-            $this->pdo->rollback();
-            return ['status' => 'error', 'message' => 'Ocurrió un error.'];
+             $this->pdo->rollback();
+             return ['status' => 'error', 'message' => 'Ocurrió un error: ' . $th->getMessage()]; // ← agrega getMessage()
         }
     }
 
