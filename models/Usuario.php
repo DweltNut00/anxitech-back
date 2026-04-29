@@ -41,7 +41,7 @@
             $mail->Username   = 'anxitech2002@gmail.com';
             $mail->Password   = 'guhkzbbtfpycabty';
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-            $mail->Port       = '587';
+            $mail->Port       = '456';
 
             // Remitente y destinatario
             $mail->setFrom('anxitech2002@gmail.com', 'Equipo de soporte Anxitech');
