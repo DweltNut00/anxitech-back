@@ -165,9 +165,9 @@ public function registerEncuestaExtra($data)
     try {
         // **MODIFICADO: Agregar los 3 nuevos campos**
        $stmt = $this->pdo->prepare("INSERT INTO complemento 
-    (id_alumno, id_aplicacion, carrera, promedio_anterior, semestre, materias, transporte, familiares, trabajo, beca, sexo, edad, estado_civil, maestros_estrictos, tiene_hijos, ingreso_mensual, horas_sueno) 
+    (id_alumno, id_aplicacion, carrera, promedio_anterior, semestre, materias, transporte, familiares, trabajo, beca, sexo, edad, estado_civil, maestros_estrictos, tiene_hijos, ingreso_mensual, horas_sueno, institucion) 
     VALUES 
-    (:id_alumno, :id_aplicacion, :carrera, :promedio_anterior, :semestre, :materias, :transporte, :familiares, :trabajo, :beca, :sexo, :edad, :estado_civil, :maestros_estrictos, :tiene_hijos, :ingreso_mensual, :horas_sueno)");
+    (:id_alumno, :id_aplicacion, :carrera, :promedio_anterior, :semestre, :materias, :transporte, :familiares, :trabajo, :beca, :sexo, :edad, :estado_civil, :maestros_estrictos, :tiene_hijos, :ingreso_mensual, :horas_sueno, :institucion)");
 
 $stmt->execute([
     'id_alumno'          => $data['id_alumno'],
@@ -187,6 +187,7 @@ $stmt->execute([
     'tiene_hijos'        => $data['tiene_hijos'],
     'ingreso_mensual'    => $data['ingreso_mensual'],
     'horas_sueno'        => $data['horas_sueno'],
+    'institucion'        => $data['institucion'] ?? 'ITO',
 ]);
 
         if ($stmt) {
