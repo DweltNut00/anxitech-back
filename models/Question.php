@@ -423,11 +423,10 @@ $stmt->execute([
     public function getDataset()
     {
         try {
-            // Obtener categorías dinámicamente
+            // Categorías dinámicas para columnas de factor
             $catStmt = $this->pdo->query("SELECT DISTINCT categoria FROM pregunta ORDER BY categoria");
             $categorias = $catStmt->fetchAll(PDO::FETCH_COLUMN);
 
-            // Construir columnas dinámicas por factor usando MAX(CASE) para evitar ONLY_FULL_GROUP_BY
             $categorySelects = [];
             foreach ($categorias as $cat) {
                 $safeName = 'factor_' . preg_replace('/[^a-zA-Z0-9]/u', '_', $cat);
@@ -436,7 +435,35 @@ $stmt->execute([
             }
             $categorySQLInner = empty($categorySelects) ? '' : ', ' . implode(', ', $categorySelects);
 
-            $innerSQL = "
+            // Subconsulta: pivot de los 7 items por alumno+aplicacion usando ROW_NUMBER
+            $itemsSQL = "
+                SELECT id_alumno, id_aplicacion,
+                    MAX(CASE WHEN rn = 1 THEN valor END) AS item_1,
+                    MAX(CASE WHEN rn = 2 THEN valor END) AS item_2,
+                    MAX(CASE WHEN rn = 3 THEN valor END) AS item_3,
+                    MAX(CASE WHEN rn = 4 THEN valor END) AS item_4,
+                    MAX(CASE WHEN rn = 5 THEN valor END) AS item_5,
+                    MAX(CASE WHEN rn = 6 THEN valor END) AS item_6,
+                    MAX(CASE WHEN rn = 7 THEN valor END) AS item_7
+                FROM (
+                    SELECT id_alumno, id_aplicacion, valor,
+                        ROW_NUMBER() OVER (PARTITION BY id_alumno, id_aplicacion ORDER BY id_pregunta) AS rn
+                    FROM alumno_pregunta
+                ) ranked
+                GROUP BY id_alumno, id_aplicacion
+            ";
+
+            // Subconsulta: último complemento por alumno
+            $complementoSQL = "
+                SELECT c1.* FROM complemento c1
+                INNER JOIN (
+                    SELECT id_alumno, MAX(id_aplicacion) AS max_ap
+                    FROM complemento GROUP BY id_alumno
+                ) c2 ON c1.id_alumno = c2.id_alumno AND c1.id_aplicacion = c2.max_ap
+            ";
+
+            // Consulta principal
+            $mainSQL = "
                 SELECT
                     a.id AS id_alumno,
                     MAX(a.nocontrol) AS nocontrol,
@@ -447,10 +474,17 @@ $stmt->execute([
                     MAX(a.estado) AS estado,
                     ap.id_aplicacion,
                     MAX(apl.inicio) AS periodo,
+                    MAX(it.item_1) AS item_1,
+                    MAX(it.item_2) AS item_2,
+                    MAX(it.item_3) AS item_3,
+                    MAX(it.item_4) AS item_4,
+                    MAX(it.item_5) AS item_5,
+                    MAX(it.item_6) AS item_6,
+                    MAX(it.item_7) AS item_7,
                     SUM(ap.valor) AS puntuacion_total
                     $categorySQLInner,
                     MAX(c.carrera) AS carrera,
-                    MAX(c.promedio_anterior) AS promedio_anterior,
+                    ROUND(MAX(c.promedio_anterior), 2) AS promedio_anterior,
                     MAX(c.semestre) AS semestre,
                     MAX(c.materias) AS materias,
                     MAX(c.maestros_estrictos) AS maestros_estrictos,
@@ -462,23 +496,18 @@ $stmt->execute([
                     MAX(c.horas_sueno) AS horas_sueno,
                     MAX(c.institucion) AS institucion
                 FROM alumno a
+                JOIN usuario u ON a.id = u.id AND u.status = 1
                 JOIN alumno_pregunta ap ON a.id = ap.id_alumno
                 JOIN pregunta p ON ap.id_pregunta = p.id
                 JOIN aplicacion apl ON ap.id_aplicacion = apl.id
-                LEFT JOIN (
-                    SELECT c1.* FROM complemento c1
-                    INNER JOIN (
-                        SELECT id_alumno, MAX(id_aplicacion) AS max_ap
-                        FROM complemento
-                        GROUP BY id_alumno
-                    ) c2 ON c1.id_alumno = c2.id_alumno AND c1.id_aplicacion = c2.max_ap
-                ) c ON a.id = c.id_alumno
+                JOIN ($itemsSQL) it ON a.id = it.id_alumno AND ap.id_aplicacion = it.id_aplicacion
+                LEFT JOIN ($complementoSQL) c ON a.id = c.id_alumno
                 GROUP BY a.id, ap.id_aplicacion
             ";
 
             $stmt = $this->pdo->query("
                 SELECT base.*, r.resultado AS nivel_ansiedad
-                FROM ($innerSQL) base
+                FROM ($mainSQL) base
                 LEFT JOIN recomendacion r
                     ON base.puntuacion_total BETWEEN r.rango_min AND r.rango_max
                 ORDER BY base.id_alumno, base.id_aplicacion
