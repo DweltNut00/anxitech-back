@@ -427,7 +427,7 @@ $stmt->execute([
             $catStmt = $this->pdo->query("SELECT DISTINCT categoria FROM pregunta ORDER BY categoria");
             $categorias = $catStmt->fetchAll(PDO::FETCH_COLUMN);
 
-            // Construir columnas dinámicas por factor
+            // Construir columnas dinámicas por factor usando MAX(CASE) para evitar ONLY_FULL_GROUP_BY
             $categorySelects = [];
             foreach ($categorias as $cat) {
                 $safeName = 'factor_' . preg_replace('/[^a-zA-Z0-9]/u', '_', $cat);
@@ -439,28 +439,28 @@ $stmt->execute([
             $innerSQL = "
                 SELECT
                     a.id AS id_alumno,
-                    a.nocontrol,
-                    TIMESTAMPDIFF(YEAR, a.fechan, CURDATE()) AS edad,
-                    a.sexo,
-                    a.estadoc,
-                    a.ciudad,
-                    a.estado,
+                    MAX(a.nocontrol) AS nocontrol,
+                    MAX(TIMESTAMPDIFF(YEAR, a.fechan, CURDATE())) AS edad,
+                    MAX(a.sexo) AS sexo,
+                    MAX(a.estadoc) AS estadoc,
+                    MAX(a.ciudad) AS ciudad,
+                    MAX(a.estado) AS estado,
                     ap.id_aplicacion,
-                    apl.inicio AS periodo,
+                    MAX(apl.inicio) AS periodo,
                     SUM(ap.valor) AS puntuacion_total
                     $categorySQLInner,
-                    c.carrera,
-                    c.promedio_anterior,
-                    c.semestre,
-                    c.materias,
-                    c.maestros_estrictos,
-                    c.transporte,
-                    c.familiares,
-                    c.trabajo,
-                    c.beca,
-                    c.ingreso_mensual,
-                    c.horas_sueno,
-                    c.institucion
+                    MAX(c.carrera) AS carrera,
+                    MAX(c.promedio_anterior) AS promedio_anterior,
+                    MAX(c.semestre) AS semestre,
+                    MAX(c.materias) AS materias,
+                    MAX(c.maestros_estrictos) AS maestros_estrictos,
+                    MAX(c.transporte) AS transporte,
+                    MAX(c.familiares) AS familiares,
+                    MAX(c.trabajo) AS trabajo,
+                    MAX(c.beca) AS beca,
+                    MAX(c.ingreso_mensual) AS ingreso_mensual,
+                    MAX(c.horas_sueno) AS horas_sueno,
+                    MAX(c.institucion) AS institucion
                 FROM alumno a
                 JOIN alumno_pregunta ap ON a.id = ap.id_alumno
                 JOIN pregunta p ON ap.id_pregunta = p.id
