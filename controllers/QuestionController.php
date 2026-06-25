@@ -45,6 +45,12 @@ class QuestionController {
         return $questionModel->registerEncuestaExtra($data);
     }
 
+    // Método para exportar dataset completo
+    public function getDataset() {
+        $questionModel = new Question($this->pdo);
+        return $questionModel->getDataset();
+    }
+
     // Método para eliminar una pregunta
     public function deletePregunta($data) {
         // Crear una instancia del modelo Question pasando la conexión PDO

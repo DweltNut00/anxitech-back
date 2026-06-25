@@ -419,6 +419,71 @@ $stmt->execute([
         }
     }
 
+    // Exportar dataset completo (sin nombre, apellido, email)
+    public function getDataset()
+    {
+        try {
+            // Obtener categorías dinámicamente
+            $catStmt = $this->pdo->query("SELECT DISTINCT categoria FROM pregunta ORDER BY categoria");
+            $categorias = $catStmt->fetchAll(PDO::FETCH_COLUMN);
+
+            // Construir columnas dinámicas por factor
+            $categorySelects = [];
+            foreach ($categorias as $cat) {
+                $safeName = 'factor_' . preg_replace('/[^a-zA-Z0-9]/u', '_', $cat);
+                $quotedCat = $this->pdo->quote($cat);
+                $categorySelects[] = "SUM(CASE WHEN p.categoria = $quotedCat THEN ap.valor ELSE 0 END) AS `$safeName`";
+            }
+            $categorySQLInner = empty($categorySelects) ? '' : ', ' . implode(', ', $categorySelects);
+
+            $innerSQL = "
+                SELECT
+                    a.id AS id_alumno,
+                    a.nocontrol,
+                    TIMESTAMPDIFF(YEAR, a.fechan, CURDATE()) AS edad,
+                    a.sexo,
+                    a.estadoc,
+                    a.ciudad,
+                    a.estado,
+                    ap.id_aplicacion,
+                    apl.inicio AS periodo,
+                    SUM(ap.valor) AS puntuacion_total
+                    $categorySQLInner,
+                    c.carrera,
+                    c.promedio_anterior,
+                    c.semestre,
+                    c.materias,
+                    c.maestros_estrictos,
+                    c.transporte,
+                    c.familiares,
+                    c.trabajo,
+                    c.beca,
+                    c.ingreso_mensual,
+                    c.horas_sueno,
+                    c.institucion
+                FROM alumno a
+                JOIN alumno_pregunta ap ON a.id = ap.id_alumno
+                JOIN pregunta p ON ap.id_pregunta = p.id
+                JOIN aplicacion apl ON ap.id_aplicacion = apl.id
+                LEFT JOIN complemento c ON a.id = c.id_alumno AND ap.id_aplicacion = c.id_aplicacion
+                GROUP BY a.id, ap.id_aplicacion
+            ";
+
+            $stmt = $this->pdo->query("
+                SELECT base.*, r.resultado AS nivel_ansiedad
+                FROM ($innerSQL) base
+                LEFT JOIN recomendacion r
+                    ON base.puntuacion_total BETWEEN r.rango_min AND r.rango_max
+                ORDER BY base.id_alumno, base.id_aplicacion
+            ");
+
+            $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            return ['status' => 'ok', 'data' => $results];
+        } catch (\Throwable $th) {
+            return ['status' => 'error', 'message' => 'Error al generar dataset: ' . $th->getMessage()];
+        }
+    }
+
     // Registrar periodo
     public function registerPeriodo($data)
     {

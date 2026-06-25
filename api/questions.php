@@ -32,6 +32,12 @@ $data = json_decode(file_get_contents('php://input'), true);
 
 switch ($action) {
 
+    case 'getDataset':
+        $questionController = new QuestionController($pdo);
+        $response = $questionController->getDataset();
+        echo json_encode($response);
+        break;
+
     case 'getPreguntas':
         $questionController = new QuestionController($pdo);  // Asegúrate de pasar la conexión PDO aquí
         $response = $questionController->getQuestions();
