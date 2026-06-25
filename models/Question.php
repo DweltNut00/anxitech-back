@@ -465,7 +465,14 @@ $stmt->execute([
                 JOIN alumno_pregunta ap ON a.id = ap.id_alumno
                 JOIN pregunta p ON ap.id_pregunta = p.id
                 JOIN aplicacion apl ON ap.id_aplicacion = apl.id
-                LEFT JOIN complemento c ON a.id = c.id_alumno AND ap.id_aplicacion = c.id_aplicacion
+                LEFT JOIN (
+                    SELECT c1.* FROM complemento c1
+                    INNER JOIN (
+                        SELECT id_alumno, MAX(id_aplicacion) AS max_ap
+                        FROM complemento
+                        GROUP BY id_alumno
+                    ) c2 ON c1.id_alumno = c2.id_alumno AND c1.id_aplicacion = c2.max_ap
+                ) c ON a.id = c.id_alumno
                 GROUP BY a.id, ap.id_aplicacion
             ";
 
